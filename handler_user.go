@@ -60,3 +60,27 @@ func handlerReset(s *state, cmd command) error {
 	fmt.Println("All rows in users successfully deleted!")
 	return nil
 }
+
+func usersHandler(s *state, cmd command) error {
+	users, err := s.db.GetUsers(context.Background())
+	if err != nil {
+		return err
+	}
+
+	if len(users) == 0 {
+		fmt.Println("No users registered.")
+		return nil
+	}
+
+	fmt.Println()
+	for _, user := range users {
+		if user == s.cfg.CurrentUserName {
+			fmt.Printf("* %s (current)\n", user)
+			continue
+		}
+		fmt.Printf("* %s\n", user)
+	}
+	fmt.Println()
+
+	return nil
+}
