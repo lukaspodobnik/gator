@@ -54,3 +54,25 @@ func followingHandler(s *state, cmd command, user database.User) error {
 
 	return nil
 }
+
+func unfollowHandler(s *state, cmd command, user database.User) error {
+	if len(cmd.args) != 1 {
+		return fmt.Errorf("usage: %s <url>", cmd.name)
+	}
+
+	url := cmd.args[0]
+	feed, err := s.db.GetFeed(context.Background(), url)
+	if err != nil {
+		return fmt.Errorf("getting feed failed: %w", err)
+	}
+
+	if err := s.db.DeleteFeedFollow(context.Background(), database.DeleteFeedFollowParams{
+		UserID: user.ID,
+		FeedID: feed.ID,
+	}); err != nil {
+		return fmt.Errorf("deleting feed-follow failed: %w", err)
+	}
+
+	fmt.Println("Successfully unsubscribed!")
+	return nil
+}

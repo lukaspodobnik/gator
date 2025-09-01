@@ -21,3 +21,7 @@ FROM feed_follows
 JOIN users ON users.id = feed_follows.user_id
 JOIN feeds ON feeds.id = feed_follows.feed_id
 WHERE users.id = $1;
+
+-- name: DeleteFeedFollow :exec
+DELETE FROM feed_follows
+WHERE $1 = feed_follows.user_id AND $2 = feed_follows.feed_id;

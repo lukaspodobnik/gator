@@ -46,6 +46,7 @@ func main() {
 	commands.register("feeds", feedsHandler)
 	commands.register("follow", middlewareLoggedIn(followHandler))
 	commands.register("following", middlewareLoggedIn(followingHandler))
+	commands.register("unfollow", middlewareLoggedIn(unfollowHandler))
 
 	args := os.Args
 	if len(args) < 2 {
