@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/lukaspodobnik/gator/internal/database"
 	"github.com/lukaspodobnik/gator/internal/rss"
 )
@@ -48,6 +49,37 @@ func fetchOldest(s *state) {
 	}
 
 	for _, item := range content.Channel.Item {
-		fmt.Println(item.Title)
+		if err := s.db.CreatePost(context.Background(), database.CreatePostParams{
+			ID:          uuid.New(),
+			CreatedAt:   time.Now(),
+			Title:       item.Title,
+			Url:         item.Link,
+			Description: item.Description,
+			PublishedAt: parseTime(item.PubDate),
+			FeedID:      feed.ID,
+		}); err != nil {
+			fmt.Printf("creating post failed: %v\n", err)
+		}
 	}
+}
+
+func parseTime(t string) time.Time {
+	var err error
+	publishedAt := time.Now()
+	for _, layout := range []string{
+		"2006-01-02T15:04:05Z07:00",
+		"2006-01-02T15:04:05.000Z07:00",
+		"Mon, 02 Jan 2006 15:04:05 -0700",
+		"Mon, 02 Jan 2006 15:04:05 MST",
+		"02 Jan 06 15:04 -0700",
+		"2006-01-02 15:04:05",
+		"2006-01-02",
+	} {
+		publishedAt, err = time.Parse(layout, t)
+		if err == nil {
+			fmt.Println("parsing pubdate worked")
+			break
+		}
+	}
+	return publishedAt.UTC()
 }
