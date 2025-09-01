@@ -9,7 +9,7 @@ import (
 	"github.com/lukaspodobnik/gator/internal/database"
 )
 
-func addfeedHandler(s *state, cmd command) error {
+func addfeedHandler(s *state, cmd command, user database.User) error {
 	if len(cmd.args) != 2 {
 		return fmt.Errorf("usage: %s <name> <url>", cmd.name)
 	}
@@ -17,18 +17,13 @@ func addfeedHandler(s *state, cmd command) error {
 	name := cmd.args[0]
 	url := cmd.args[1]
 
-	current_user, err := s.db.GetUser(context.Background(), s.cfg.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("getting user %s failed: %w", s.cfg.CurrentUserName, err)
-	}
-
 	feed, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		Name:      name,
 		Url:       url,
-		UserID:    current_user.ID,
+		UserID:    user.ID,
 	})
 	if err != nil {
 		return fmt.Errorf("creating feed in db failed: %w", err)
@@ -40,13 +35,13 @@ func addfeedHandler(s *state, cmd command) error {
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		UserID:    current_user.ID,
+		UserID:    user.ID,
 		FeedID:    feed.ID,
 	}); err != nil {
 		return fmt.Errorf("could not follow the created feed: %w", err)
 	}
 
-	fmt.Printf("%s is now following %s\n", current_user.Name, feed.Name)
+	fmt.Printf("%s is now following %s\n", user.Name, feed.Name)
 	return nil
 }
 

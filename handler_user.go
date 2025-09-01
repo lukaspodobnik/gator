@@ -9,7 +9,7 @@ import (
 	"github.com/lukaspodobnik/gator/internal/database"
 )
 
-func handlerLogin(s *state, cmd command) error {
+func loginHandler(s *state, cmd command) error {
 	if len(cmd.args) != 1 {
 		return fmt.Errorf("usage: %s <name>", cmd.name)
 	}
@@ -28,7 +28,7 @@ func handlerLogin(s *state, cmd command) error {
 	return nil
 }
 
-func handlerRegister(s *state, cmd command) error {
+func registerHandler(s *state, cmd command) error {
 	if len(cmd.args) != 1 {
 		return fmt.Errorf("usage: %s <name>", cmd.name)
 	}
