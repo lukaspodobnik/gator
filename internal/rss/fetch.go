@@ -5,8 +5,9 @@ import (
 	"encoding/xml"
 	"fmt"
 	"html"
-	"io"
 	"net/http"
+
+	"golang.org/x/net/html/charset"
 )
 
 func FetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
@@ -22,14 +23,11 @@ func FetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 	}
 	defer resp.Body.Close()
 
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return &RSSFeed{}, fmt.Errorf("reading the response body failed: %w", err)
-	}
-
 	var feed RSSFeed
-	if err := xml.Unmarshal(data, &feed); err != nil {
-		return &RSSFeed{}, fmt.Errorf("unmarshaling data from response failed: %w", err)
+	decoder := xml.NewDecoder(resp.Body)
+	decoder.CharsetReader = charset.NewReaderLabel
+	if err := decoder.Decode(&feed); err != nil {
+		return &RSSFeed{}, fmt.Errorf("decoding response body failed: %v", err)
 	}
 
 	feed.Channel.Title = html.UnescapeString(feed.Channel.Title)

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -25,7 +26,6 @@ func aggHandler(s *state, cmd command) error {
 	ticker := time.NewTicker(duration)
 	for ; ; <-ticker.C {
 		fetchOldest(s)
-		fmt.Println()
 	}
 }
 
@@ -37,7 +37,7 @@ func fetchOldest(s *state) {
 
 	content, err := rss.FetchFeed(context.Background(), feed.Url)
 	if err != nil {
-		fmt.Println("fetching the feed failed")
+		fmt.Printf("fetching the feed failed: %v\n", err)
 		return
 	}
 
@@ -45,7 +45,7 @@ func fetchOldest(s *state) {
 		UpdatedAt: time.Now(),
 		ID:        feed.ID,
 	}); err != nil {
-		fmt.Println("marking feed as fetched failed")
+		fmt.Printf("marking feed as fetched failed: %v", err)
 	}
 
 	for _, item := range content.Channel.Item {
@@ -61,6 +61,8 @@ func fetchOldest(s *state) {
 			fmt.Printf("creating post failed: %v\n", err)
 		}
 	}
+
+	log.Printf("Posts from '%s' saved successfully!\n", feed.Name)
 }
 
 func parseTime(t string) time.Time {
@@ -77,7 +79,6 @@ func parseTime(t string) time.Time {
 	} {
 		publishedAt, err = time.Parse(layout, t)
 		if err == nil {
-			fmt.Println("parsing pubdate worked")
 			break
 		}
 	}

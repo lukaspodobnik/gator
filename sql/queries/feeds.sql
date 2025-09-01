@@ -15,6 +15,11 @@ SELECT *
 FROM feeds
 WHERE feeds.url = $1;
 
+-- name: GetFeedFromID :one
+SELECT feeds.*
+FROM feeds
+WHERE feeds.id = $1;
+
 -- name: GetFeeds :many
 SELECT feeds.name, feeds.url, users.name AS created_by
 FROM feeds

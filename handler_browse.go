@@ -29,6 +29,12 @@ func browseHandler(s *state, cmd command, user database.User) error {
 	}
 
 	for _, post := range posts {
+		feed, err := s.db.GetFeedFromID(context.Background(), post.FeedID)
+		if err != nil {
+			return fmt.Errorf("getting feed failed: %w", err)
+		}
+
+		fmt.Printf("Feed: %s\n", feed.Name)
 		fmt.Printf("Title:       %s\n", post.Title)
 		fmt.Printf("Description: %s\n", post.Description)
 		fmt.Println()
